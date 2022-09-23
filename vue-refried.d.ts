@@ -1,8 +1,8 @@
-import type { Ref, UnwrapRef } from "vue";
+import type { Ref } from "vue";
 declare type Refried<T, N extends string> = {
     [key in N]: T;
 } & {
-    ref: Ref<UnwrapRef<T>>;
+    ref: Ref<T>;
 };
 export declare function refriedValue<T, N extends string>(name: N, initialValue?: unknown): Refried<T, N>;
 export declare function refriedConstructedValue<T, N extends string>(name: N, cons: new (...args: unknown[]) => T, initialValue?: unknown): Refried<T, N>;

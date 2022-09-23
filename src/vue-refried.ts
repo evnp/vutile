@@ -1,10 +1,10 @@
 import { ref as vueRef } from "vue";
-import type { Ref, UnwrapRef } from "vue";
+import type { Ref } from "vue";
 
 type Refried<T, N extends string> = {
   [key in N]: T;
 } & {
-  ref: Ref<UnwrapRef<T>>;
+  ref: Ref<T>;
 };
 
 export function refriedValue<T, N extends string>(

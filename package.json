@@ -1,6 +1,6 @@
 {
   "name": "vue-refried",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Tastier refs in Vue 3",
   "main": "vue-refried.js",
   "types": "vue-refried.d.ts",
