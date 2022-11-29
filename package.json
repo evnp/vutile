@@ -1,26 +1,26 @@
 {
-  "name": "vue-refried",
-  "version": "0.0.2",
-  "description": "Tastier refs in Vue 3",
-  "main": "vue-refried.js",
-  "types": "vue-refried.d.ts",
+  "name": "vutile",
+  "version": "0.0.1",
+  "description": "Utilities for clearer, smaller, safer Vue code.",
+  "main": "vutile.js",
+  "types": "vutile.d.ts",
   "files": [
-    "vue-refried.d.ts",
-    "vue-refried.js",
-    "vue-refried.min.js",
-    "vue-refried.min.js.gz"
+    "vutile.d.ts",
+    "vutile.js",
+    "vutile.min.js",
+    "vutile.min.js.gz"
   ],
   "scripts": {
     "build": "tsc && npm run minify",
     "test": "jest",
     "lint": "eslint src/ test/",
     "format": "eslint --fix src/ test/",
-    "minify": "esbuild --minify --target=es5 vue-refried.js > vue-refried.min.js && gzip -kf9 vue-refried.min.js && echo \"vue-refried.min.js.gz :: $( ls -lh vue-refried.min.js.gz | tr -s ' ' | cut -d' ' -f5 ) :: $( ls -l vue-refried.min.js.gz | tr -s ' ' | cut -d' ' -f5 )B\"",
-    "repl": "node vue-refried.repl.js"
+    "minify": "esbuild --minify --target=es5 index.js > vutile.min.js && gzip -kf9 vutile.min.js && echo \"vutile.min.js.gz :: $( ls -lh vutile.min.js.gz | tr -s ' ' | cut -d' ' -f5 ) :: $( ls -l vutile.min.js.gz | tr -s ' ' | cut -d' ' -f5 )B\"",
+    "repl": "node vutile.repl.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/evnp/vue-refried.git"
+    "url": "git+https://github.com/evnp/vutile.git"
   },
   "keywords": [
     "css",
@@ -32,9 +32,9 @@
   "author": "Evan Purcer",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/evnp/vue-refried/issues"
+    "url": "https://github.com/evnp/vutile/issues"
   },
-  "homepage": "https://github.com/evnp/vue-refried#readme",
+  "homepage": "https://github.com/evnp/vutile#readme",
   "dependencies": {
     "vue": "^3.2.39"
   },

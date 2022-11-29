@@ -1,16 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.refriedElement = exports.refried = exports.refriedValidatedValue = exports.refriedConstructedValue = exports.refriedValue = void 0;
+exports.elementRef = exports.namedRef = exports.validatedRefValue = exports.constructedRefValue = exports.refValue = void 0;
 var vue_1 = require("vue");
-function refriedValue(name, initialValue) {
+function refValue(name, initialValue) {
     if (initialValue === void 0) { initialValue = null; }
     var ref = (0, vue_1.ref)(initialValue);
     var beans = { ref: ref };
     Object.defineProperty(beans, name, { get: function () { return ref.value; } });
     return beans;
 }
-exports.refriedValue = refriedValue;
-function refriedConstructedValue(name, cons, initialValue) {
+exports.refValue = refValue;
+function constructedRefValue(name, cons, initialValue) {
     var ref = (0, vue_1.ref)(initialValue);
     var beans = { ref: ref };
     Object.defineProperty(beans, name, {
@@ -23,8 +23,8 @@ function refriedConstructedValue(name, cons, initialValue) {
     });
     return beans;
 }
-exports.refriedConstructedValue = refriedConstructedValue;
-function refriedValidatedValue(name, validator, initialValue) {
+exports.constructedRefValue = constructedRefValue;
+function validatedRefValue(name, validator, initialValue) {
     var ref = (0, vue_1.ref)(initialValue);
     var beans = { ref: ref };
     Object.defineProperty(beans, name, {
@@ -37,25 +37,25 @@ function refriedValidatedValue(name, validator, initialValue) {
     });
     return beans;
 }
-exports.refriedValidatedValue = refriedValidatedValue;
-function refried(name, constructorOrValidator, initialValue) {
+exports.validatedRefValue = validatedRefValue;
+function namedRef(name, constructorOrValidator, initialValue) {
     var _a;
     if (constructorOrValidator === void 0) { constructorOrValidator = null; }
     var cv = constructorOrValidator;
     if (typeof cv === "function") {
         if (((_a = cv.prototype) === null || _a === void 0 ? void 0 : _a.constructor) === cv) {
-            return refriedConstructedValue(name, cv, initialValue);
+            return constructedRefValue(name, cv, initialValue);
         }
         else {
-            return refriedValidatedValue(name, cv, initialValue);
+            return validatedRefValue(name, cv, initialValue);
         }
     }
     else {
-        return refriedValue(name, initialValue);
+        return refValue(name, initialValue);
     }
 }
-exports.refried = refried;
-function refriedElement(constructorOrValidator, initialValue) {
-    return refried("element", constructorOrValidator, initialValue);
+exports.namedRef = namedRef;
+function elementRef(constructorOrValidator, initialValue) {
+    return namedRef("element", constructorOrValidator, initialValue);
 }
-exports.refriedElement = refriedElement;
+exports.elementRef = elementRef;

@@ -5,7 +5,7 @@
 // and require typescript-eslint's aggressive restriction
 // of these notations to be ignored ("ban-ts-comment").
 
-describe("vue-refried", () => {
+describe("vutile", () => {
   test("TODO", () => {
     expect("TODO").toBe("TODO");
   });

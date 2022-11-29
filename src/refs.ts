@@ -7,7 +7,7 @@ type Refried<T, N extends string> = {
   ref: Ref<T>;
 };
 
-export function refriedValue<T, N extends string>(
+export function refValue<T, N extends string>(
   name: N,
   initialValue: unknown = null
 ): Refried<T, N> {
@@ -17,7 +17,7 @@ export function refriedValue<T, N extends string>(
   return beans as unknown as Refried<T, N>;
 }
 
-export function refriedConstructedValue<T, N extends string>(
+export function constructedRefValue<T, N extends string>(
   name: N,
   cons: new (...args: unknown[]) => T,
   initialValue?: unknown
@@ -37,7 +37,7 @@ export function refriedConstructedValue<T, N extends string>(
   return beans as unknown as Refried<T, N>;
 }
 
-export function refriedValidatedValue<T, N extends string>(
+export function validatedRefValue<T, N extends string>(
   name: string,
   validator: (value: unknown) => boolean,
   initialValue?: unknown
@@ -57,7 +57,7 @@ export function refriedValidatedValue<T, N extends string>(
   return beans as unknown as Refried<T, N>;
 }
 
-export function refried<T, N extends string>(
+export function namedRef<T, N extends string>(
   name: N,
   constructorOrValidator:
     | null
@@ -70,25 +70,25 @@ export function refried<T, N extends string>(
   type Validator = (value: unknown) => boolean;
   if (typeof cv === "function") {
     if (cv.prototype?.constructor === cv) {
-      return refriedConstructedValue<T, N>(
-        name,
-        cv as Constructor,
-        initialValue
-      );
+      return constructedRefValue<T, N>(name, cv as Constructor, initialValue);
     } else {
-      return refriedValidatedValue<T, N>(name, cv as Validator, initialValue);
+      return validatedRefValue<T, N>(name, cv as Validator, initialValue);
     }
   } else {
-    return refriedValue<T, N>(name, initialValue);
+    return refValue<T, N>(name, initialValue);
   }
 }
 
-export function refriedElement<T>(
+export function elementRef<T>(
   constructorOrValidator:
     | null
     | (new (...args: unknown[]) => T)
     | ((value: unknown) => boolean),
   initialValue?: unknown
 ): Refried<T, "element"> {
-  return refried<T, "element">("element", constructorOrValidator, initialValue);
+  return namedRef<T, "element">(
+    "element",
+    constructorOrValidator,
+    initialValue
+  );
 }
