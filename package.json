@@ -1,22 +1,20 @@
 {
   "name": "vutile",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Utilities for clearer, smaller, safer Vue code.",
-  "main": "vutile.js",
-  "types": "vutile.d.ts",
+  "main": "dist/vutile.js",
+  "types": "dist/vutile.d.ts",
   "files": [
-    "vutile.d.ts",
-    "vutile.js",
-    "vutile.min.js",
-    "vutile.min.js.gz"
+    "dist/*"
   ],
   "scripts": {
-    "build": "tsc && npm run minify",
+    "build": "tsc && npm run --silent minify",
+    "clean": "rm -r ./dist || true",
     "test": "jest",
     "lint": "eslint src/ test/",
     "format": "eslint --fix src/ test/",
-    "minify": "esbuild --minify --target=es5 vutile.js > vutile.min.js && gzip -kf9 vutile.min.js && echo \"vutile.min.js.gz :: $( ls -lh vutile.min.js.gz | tr -s ' ' | cut -d' ' -f5 ) :: $( ls -l vutile.min.js.gz | tr -s ' ' | cut -d' ' -f5 )B\"",
-    "repl": "node vutile.repl.js"
+    "minify": "esbuild --minify --target=es5 dist/vutile.js > dist/vutile.min.js && gzip -kf9 dist/vutile.min.js && cd dist && for file in `ls`; do printf \"%-32s %6s\n\" \"dist/${file}#\" \"#$( ls -l $file | tr -s ' ' | cut -d' ' -f5 )B\" | tr ' ' '·' | tr '#' ' '; done",
+    "repl": "node tools/vutile.repl.js"
   },
   "repository": {
     "type": "git",
