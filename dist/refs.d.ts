@@ -1,5 +1,5 @@
 import type { Ref } from "vue";
-declare type Refried<T, N extends string> = {
+type Refried<T, N extends string> = {
     [key in N]: T;
 } & {
     ref: Ref<T>;
