@@ -1,6 +1,6 @@
 {
   "name": "vutile",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Utilities for clearer, smaller, safer Vue code.",
   "main": "dist/vutile.min.js",
   "types": "dist/vutile.d.ts",
@@ -18,7 +18,8 @@
     "format": "eslint --fix src/ test/",
     "repl": "node tools/vutile.repl.js",
     "info": "cd dist && echo && for file in `ls`; do printf \"%-28s %10s\n\" \"dist/${file}#\" \"#$( ls -l $file | tr -s ' ' | cut -d' ' -f5 | awk '{print $1/1000}' )KB\" | tr ' ' '·' | tr '#' ' '; done && echo",
-    "update": "npx npm-check-updates -u && npm install"
+    "update": "npx npm-check-updates -u && npm install",
+    "release": "git push private main && git push public main && npm publish"
   },
   "repository": {
     "type": "git",
