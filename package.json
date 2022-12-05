@@ -1,6 +1,6 @@
 {
   "name": "vutile",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Utilities for clearer, smaller, safer Vue code.",
   "main": "dist/vutile.min.js",
   "types": "dist/vutile.d.ts",
