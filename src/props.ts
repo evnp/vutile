@@ -3,6 +3,13 @@ import type { Prop } from "vue";
 
 // P ~ a DSL for compact-yet-explicit, type-aware Vue component prop definitions
 
+function castReturnValueToBoolean<T>(func: unknown): (value: T) => boolean {
+  return (value: T) => Boolean((func as (value: unknown) => unknown)(value));
+  // Vue's prop validators require a boolean return type;
+  // we relax this slightly by allowing any return type
+  // and simply casting the validator result to boolean.
+}
+
 type PType =
   | typeof String
   | typeof Number
@@ -14,7 +21,7 @@ type PType =
   | typeof Symbol;
 
 function pOptFn<T>(pType: PType) {
-  return (): Prop<T> & { required: false } => {
+  return function (): Prop<T> & { required: false } {
     return {
       type: pType,
       required: false,
@@ -23,7 +30,7 @@ function pOptFn<T>(pType: PType) {
 }
 
 function pReqFn<T>(pType: PType) {
-  return (): Prop<T> & { required: true } => {
+  return function (): Prop<T> & { required: true } {
     return {
       type: pType,
       required: true,
@@ -32,48 +39,62 @@ function pReqFn<T>(pType: PType) {
 }
 
 function pDefaultFn<T>(pType: PType) {
-  return (dflt?: T): Prop<T> & { default: T } => {
+  return function (
+    dflt: T,
+    validator?: (value: T) => unknown
+  ): Prop<T> & { default: T; validator?: (value: T) => boolean } {
     return {
       type: pType,
       required: false,
-      ...(typeof dflt !== undefined ? { default: dflt } : {}),
-    } as unknown as Prop<T> & { default: T };
+      default: dflt,
+      ...(validator ? { validator: castReturnValueToBoolean(validator) } : {}),
+    } as unknown as Prop<T> & { default: T; validator?: (value: T) => boolean };
   };
 }
 
 function pTypedOptFn<BaseT>(base: BaseT) {
-  return function <PropT = BaseT>(): {
+  return function <PropT>(validator?: (value: PropT) => unknown): {
     type: PropType<PropT>;
     required: false;
+    validator?: (value: PropT) => boolean;
   } {
     return {
       type: base as unknown as PropType<PropT>,
       required: false,
+      ...(validator ? { validator: castReturnValueToBoolean(validator) } : {}),
     };
   };
 }
 
 function pTypedReqFn<BaseT>(base: BaseT) {
-  return function <PropT = BaseT>(): { type: PropType<PropT>; required: true } {
+  return function <PropT>(validator?: (value: PropT) => unknown): {
+    type: PropType<PropT>;
+    required: true;
+    validator?: (value: PropT) => boolean;
+  } {
     return {
       type: base as unknown as PropType<PropT>,
       required: true,
+      ...(validator ? { validator: castReturnValueToBoolean(validator) } : {}),
     };
   };
 }
 
 function pTypedDefaultFn<BaseT>(base: BaseT) {
   return function <PropT = BaseT>(
-    dflt: PropT
+    dflt: PropT,
+    validator?: (value: PropT) => unknown
   ): {
     type: PropType<PropT>;
     required: false;
     default: PropT;
+    validator?: (value: PropT) => boolean;
   } {
     return {
       type: base as unknown as PropType<PropT>,
       required: false,
       default: dflt,
+      ...(validator ? { validator: castReturnValueToBoolean(validator) } : {}),
     };
   };
 }
@@ -114,6 +135,8 @@ const pArrDefaultEmpty = pDefaultFn<unknown[]>(Array)([]);
 const pFuncDefaultIdentity = pDefaultFn<(...args: unknown[]) => unknown>(
   Function
 )((x) => x);
+const pDateDefaultNow = pDefaultFn<Date>(Date)(new Date());
+const pSymDefaultEmpty = pDefaultFn<symbol>(Symbol)(Symbol());
 
 type PStrOpt = ReturnType<typeof pStrOpt>;
 type PNumOpt = ReturnType<typeof pNumOpt>;
@@ -149,6 +172,8 @@ type PBoolDefaultTrue = ReturnType<typeof pBoolDefault>;
 type PObjDefaultEmpty = ReturnType<typeof pObjDefault>;
 type PArrDefaultEmpty = ReturnType<typeof pArrDefault>;
 type PFuncDefaultIdentity = ReturnType<typeof pFuncDefault>;
+type PDateDefaultNow = ReturnType<typeof pDateDefault>;
+type PSymDefaultEmpty = ReturnType<typeof pSymDefault>;
 
 type PTypedOpt = typeof pTypedOptFn;
 type PTypedReq = typeof pTypedReqFn;
@@ -177,6 +202,47 @@ type PTypedDateDefault = ReturnType<typeof pTypedDefaultFn>;
 type PTypedSymOpt = ReturnType<typeof pTypedOptFn>;
 type PTypedSymReq = ReturnType<typeof pTypedReqFn>;
 type PTypedSymDefault = ReturnType<typeof pTypedDefaultFn>;
+
+function pValidated<T extends PStrOpt | PStrReq | PStrDefaultEmpty>(
+  pType: T,
+  validator: (value: string) => unknown
+): T & { validator: (value: string) => boolean };
+function pValidated<T extends PNumOpt | PNumReq | PNumDefaultZero>(
+  pType: T,
+  validator: (value: number) => unknown
+): T & { validator: (value: number) => boolean };
+function pValidated<
+  T extends PBoolOpt | PBoolReq | PBoolDefaultFalse | PBoolDefaultTrue
+>(
+  pType: T,
+  validator: (value: boolean) => unknown
+): T & { validator: (value: boolean) => boolean };
+function pValidated<T extends PObjOpt | PObjReq | PObjDefaultEmpty>(
+  pType: T,
+  validator: (value: Record<PropertyKey, unknown>) => unknown
+): T & { validator: (value: Array<unknown>) => boolean };
+function pValidated<T extends PArrOpt | PArrReq | PArrDefaultEmpty>(
+  pType: T,
+  validator: (value: Array<unknown>) => unknown
+): T & { validator: (value: Array<unknown>) => boolean };
+function pValidated<T extends PFuncOpt | PFuncReq | PFuncDefaultIdentity>(
+  pType: T,
+  validator: (value: (...any: unknown[]) => unknown) => unknown
+): T & { validator: (value: (...any: unknown[]) => unknown) => boolean };
+function pValidated<T extends PDateOpt | PDateReq | PDateDefaultNow>(
+  pType: T,
+  validator: (value: Date) => unknown
+): T & { validator: (value: Date) => boolean };
+function pValidated<T extends PSymOpt | PSymReq | PSymDefaultEmpty>(
+  pType: T,
+  validator: (value: symbol) => unknown
+): T & { validator: (value: symbol) => boolean };
+function pValidated(pType: object, validator: unknown) {
+  return {
+    ...pType,
+    validator: castReturnValueToBoolean(validator),
+  };
+}
 
 const P: {
   Str: PStrOpt;
@@ -213,6 +279,8 @@ const P: {
   ObjDefaultEmpty: PObjDefaultEmpty;
   ArrDefaultEmpty: PArrDefaultEmpty;
   FuncDefaultIdentity: PFuncDefaultIdentity;
+  DateDefaultNow: PDateDefaultNow;
+  SymDefaultEmpty: PSymDefaultEmpty;
 
   Typed: PTypedOpt;
   TypedReq: PTypedReq;
@@ -241,6 +309,8 @@ const P: {
   TypedSym: PTypedSymOpt;
   TypedSymReq: PTypedSymReq;
   TypedSymDefault: PTypedSymDefault;
+
+  Validated: typeof pValidated;
 
   S: PStrOpt;
   N: PNumOpt;
@@ -276,6 +346,8 @@ const P: {
   ODE: PObjDefaultEmpty;
   ADE: PArrDefaultEmpty;
   FDI: PFuncDefaultIdentity;
+  DDN: PDateDefaultNow;
+  YDE: PSymDefaultEmpty;
 
   TS: PTypedStrOpt;
   TSR: PTypedStrReq;
@@ -300,6 +372,8 @@ const P: {
   TY: PTypedSymOpt;
   TYR: PTypedSymReq;
   TYD: PTypedSymDefault;
+
+  V: typeof pValidated;
 } = {
   Str: pStrOpt(),
   Num: pNumOpt(),
@@ -335,6 +409,8 @@ const P: {
   ObjDefaultEmpty: pObjDefaultEmpty,
   ArrDefaultEmpty: pArrDefaultEmpty,
   FuncDefaultIdentity: pFuncDefaultIdentity,
+  DateDefaultNow: pDateDefaultNow,
+  SymDefaultEmpty: pSymDefaultEmpty,
 
   Typed: pTypedOptFn,
   TypedReq: pTypedReqFn,
@@ -363,6 +439,8 @@ const P: {
   TypedSym: pTypedOptFn(Symbol),
   TypedSymReq: pTypedReqFn(Symbol),
   TypedSymDefault: pTypedDefaultFn(Symbol),
+
+  Validated: pValidated,
 
   S: pStrOpt(),
   N: pNumOpt(),
@@ -398,6 +476,8 @@ const P: {
   ODE: pObjDefaultEmpty,
   ADE: pArrDefaultEmpty,
   FDI: pFuncDefaultIdentity,
+  DDN: pDateDefaultNow,
+  YDE: pSymDefaultEmpty,
 
   TS: pTypedOptFn(String),
   TSR: pTypedReqFn(String),
@@ -422,6 +502,8 @@ const P: {
   TY: pTypedOptFn(Symbol),
   TYR: pTypedReqFn(Symbol),
   TYD: pTypedDefaultFn(Symbol),
+
+  V: pValidated,
 };
 
 export { P };
