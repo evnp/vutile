@@ -257,6 +257,36 @@ const pFuncOrNull = pTypedDefaultFn(Function)<
 const pDateOrNull = pTypedDefaultFn(Date)<Date | null>(null);
 const pSymOrNull = pTypedDefaultFn(Symbol)<symbol | null>(null);
 
+function mutuallyExclusive<P extends Record<string, unknown>>(
+  {
+    props,
+    prefix = "",
+    message = null,
+    throwError = true,
+  }: {
+    props: P;
+    prefix?: string;
+    message?: string | null;
+    throwError?: boolean;
+  },
+  ...propNames: Array<keyof P>
+): boolean {
+  const invalid =
+    propNames
+      .map((name) => {
+        return Object.prototype.hasOwnProperty.call(props, name) && props[name];
+      })
+      .filter(Boolean).length > 1;
+  if (throwError && invalid) {
+    const fmtNames = propNames.map((name) => `"${name as string}"`).join(", ");
+    throw new Error(
+      message ??
+        `${prefix}Multiple of mutually-exclusive props ${fmtNames} were provided.`
+    );
+  }
+  return invalid;
+}
+
 type P = {
   Str: PStrOpt;
   Num: PNumOpt;
@@ -405,6 +435,8 @@ type P = {
   TYD: PTypedSymDefault;
 
   V: typeof pValidated;
+
+  mutuallyExclusive: typeof mutuallyExclusive;
 };
 const P: P = {
   Str: pStrOpt(),
@@ -554,6 +586,8 @@ const P: P = {
   TYD: pTypedDefaultFn(Symbol),
 
   V: pValidated,
+
+  mutuallyExclusive,
 };
 
 type PStrictDefaults = Omit<

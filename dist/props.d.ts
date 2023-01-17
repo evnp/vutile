@@ -222,6 +222,12 @@ declare const pSymOrNull: {
     default: symbol | null;
     validator?: ((value: symbol | null) => boolean) | undefined;
 };
+declare function mutuallyExclusive<P extends Record<string, unknown>>({ props, prefix, message, throwError, }: {
+    props: P;
+    prefix?: string;
+    message?: string | null;
+    throwError?: boolean;
+}, ...propNames: Array<keyof P>): boolean;
 type P = {
     Str: PStrOpt;
     Num: PNumOpt;
@@ -346,6 +352,7 @@ type P = {
     TYR: PTypedSymReq;
     TYD: PTypedSymDefault;
     V: typeof pValidated;
+    mutuallyExclusive: typeof mutuallyExclusive;
 };
 declare const P: P;
 type PStrictDefaults = Omit<P, "Str" | "Num" | "Bool" | "Obj" | "Arr" | "Func" | "Date" | "Sym" | "S" | "N" | "B" | "O" | "A" | "F" | "D" | "Y"> & {
