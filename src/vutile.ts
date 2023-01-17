@@ -1,4 +1,4 @@
-export { P } from "./props";
+export { P, PStrictDefaults } from "./props";
 export {
   namedRef,
   elementRef,

@@ -222,7 +222,7 @@ declare const pSymOrNull: {
     default: symbol | null;
     validator?: ((value: symbol | null) => boolean) | undefined;
 };
-declare const P: {
+type P = {
     Str: PStrOpt;
     Num: PNumOpt;
     Bool: PBoolOpt;
@@ -347,4 +347,24 @@ declare const P: {
     TYD: PTypedSymDefault;
     V: typeof pValidated;
 };
-export { P };
+declare const P: P;
+type PStrictDefaults = Omit<P, "Str" | "Num" | "Bool" | "Obj" | "Arr" | "Func" | "Date" | "Sym" | "S" | "N" | "B" | "O" | "A" | "F" | "D" | "Y"> & {
+    Str: typeof pStrOrNull;
+    Num: typeof pNumOrNull;
+    Bool: PBoolDefaultFalse;
+    Obj: typeof pObjOrNull;
+    Arr: typeof pArrOrNull;
+    Func: typeof pFuncOrNull;
+    Date: typeof pDateOrNull;
+    Sym: typeof pSymOrNull;
+    S: typeof pStrOrNull;
+    N: typeof pNumOrNull;
+    B: PBoolDefaultFalse;
+    O: typeof pObjOrNull;
+    A: typeof pArrOrNull;
+    F: typeof pFuncOrNull;
+    D: typeof pDateOrNull;
+    Y: typeof pSymOrNull;
+};
+declare const PStrictDefaults: PStrictDefaults;
+export { P, PStrictDefaults };

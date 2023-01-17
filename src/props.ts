@@ -257,7 +257,7 @@ const pFuncOrNull = pTypedDefaultFn(Function)<
 const pDateOrNull = pTypedDefaultFn(Date)<Date | null>(null);
 const pSymOrNull = pTypedDefaultFn(Symbol)<symbol | null>(null);
 
-const P: {
+type P = {
   Str: PStrOpt;
   Num: PNumOpt;
   Bool: PBoolOpt;
@@ -405,7 +405,8 @@ const P: {
   TYD: PTypedSymDefault;
 
   V: typeof pValidated;
-} = {
+};
+const P: P = {
   Str: pStrOpt(),
   Num: pNumOpt(),
   Bool: pBoolOpt(),
@@ -555,4 +556,60 @@ const P: {
   V: pValidated,
 };
 
-export { P };
+type PStrictDefaults = Omit<
+  P,
+  | "Str"
+  | "Num"
+  | "Bool"
+  | "Obj"
+  | "Arr"
+  | "Func"
+  | "Date"
+  | "Sym"
+  | "S"
+  | "N"
+  | "B"
+  | "O"
+  | "A"
+  | "F"
+  | "D"
+  | "Y"
+> & {
+  Str: typeof pStrOrNull;
+  Num: typeof pNumOrNull;
+  Bool: PBoolDefaultFalse;
+  Obj: typeof pObjOrNull;
+  Arr: typeof pArrOrNull;
+  Func: typeof pFuncOrNull;
+  Date: typeof pDateOrNull;
+  Sym: typeof pSymOrNull;
+  S: typeof pStrOrNull;
+  N: typeof pNumOrNull;
+  B: PBoolDefaultFalse;
+  O: typeof pObjOrNull;
+  A: typeof pArrOrNull;
+  F: typeof pFuncOrNull;
+  D: typeof pDateOrNull;
+  Y: typeof pSymOrNull;
+};
+const PStrictDefaults: PStrictDefaults = {
+  ...P,
+  Str: pStrOrNull,
+  Num: pNumOrNull,
+  Bool: pBoolDefaultFalse,
+  Obj: pObjOrNull,
+  Arr: pArrOrNull,
+  Func: pFuncOrNull,
+  Date: pDateOrNull,
+  Sym: pSymOrNull,
+  S: pStrOrNull,
+  N: pNumOrNull,
+  B: pBoolDefaultFalse,
+  O: pObjOrNull,
+  A: pArrOrNull,
+  F: pFuncOrNull,
+  D: pDateOrNull,
+  Y: pSymOrNull,
+};
+
+export { P, PStrictDefaults };
