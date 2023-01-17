@@ -244,6 +244,19 @@ function pValidated(pType: object, validator: unknown) {
   };
 }
 
+const pStrOrNull = pTypedDefaultFn(String)<string | null>(null);
+const pNumOrNull = pTypedDefaultFn(Number)<number | null>(null);
+const pBoolOrNull = pTypedDefaultFn(Boolean)<boolean | null>(null);
+const pObjOrNull = pTypedDefaultFn(Object)<Record<PropertyKey, unknown> | null>(
+  null
+);
+const pArrOrNull = pTypedDefaultFn(Array<unknown>)<Array<unknown> | null>(null);
+const pFuncOrNull = pTypedDefaultFn(Function)<
+  ((...any: unknown[]) => unknown) | null
+>(null);
+const pDateOrNull = pTypedDefaultFn(Date)<Date | null>(null);
+const pSymOrNull = pTypedDefaultFn(Symbol)<symbol | null>(null);
+
 const P: {
   Str: PStrOpt;
   Num: PNumOpt;
@@ -281,6 +294,15 @@ const P: {
   FuncDefaultIdentity: PFuncDefaultIdentity;
   DateDefaultNow: PDateDefaultNow;
   SymDefaultEmpty: PSymDefaultEmpty;
+
+  StrOrNull: typeof pStrOrNull;
+  NumOrNull: typeof pNumOrNull;
+  BoolOrNull: typeof pBoolOrNull;
+  ObjOrNull: typeof pObjOrNull;
+  ArrOrNull: typeof pArrOrNull;
+  FuncOrNull: typeof pFuncOrNull;
+  DateOrNull: typeof pDateOrNull;
+  SymOrNull: typeof pSymOrNull;
 
   Typed: PTypedOpt;
   TypedReq: PTypedReq;
@@ -349,6 +371,15 @@ const P: {
   DDN: PDateDefaultNow;
   YDE: PSymDefaultEmpty;
 
+  SON: typeof pStrOrNull;
+  NON: typeof pNumOrNull;
+  BON: typeof pBoolOrNull;
+  OON: typeof pObjOrNull;
+  AON: typeof pArrOrNull;
+  FON: typeof pFuncOrNull;
+  DON: typeof pDateOrNull;
+  YON: typeof pSymOrNull;
+
   TS: PTypedStrOpt;
   TSR: PTypedStrReq;
   TSD: PTypedStrDefault;
@@ -411,6 +442,15 @@ const P: {
   FuncDefaultIdentity: pFuncDefaultIdentity,
   DateDefaultNow: pDateDefaultNow,
   SymDefaultEmpty: pSymDefaultEmpty,
+
+  StrOrNull: pStrOrNull,
+  NumOrNull: pNumOrNull,
+  BoolOrNull: pBoolOrNull,
+  ObjOrNull: pObjOrNull,
+  ArrOrNull: pArrOrNull,
+  FuncOrNull: pFuncOrNull,
+  DateOrNull: pDateOrNull,
+  SymOrNull: pSymOrNull,
 
   Typed: pTypedOptFn,
   TypedReq: pTypedReqFn,
@@ -478,6 +518,15 @@ const P: {
   FDI: pFuncDefaultIdentity,
   DDN: pDateDefaultNow,
   YDE: pSymDefaultEmpty,
+
+  SON: pStrOrNull,
+  NON: pNumOrNull,
+  BON: pBoolOrNull,
+  OON: pObjOrNull,
+  AON: pArrOrNull,
+  FON: pFuncOrNull,
+  DON: pDateOrNull,
+  YON: pSymOrNull,
 
   TS: pTypedOptFn(String),
   TSR: pTypedReqFn(String),

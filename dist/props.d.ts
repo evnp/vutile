@@ -174,6 +174,54 @@ declare function pValidated<T extends PDateOpt | PDateReq | PDateDefaultNow>(pTy
 declare function pValidated<T extends PSymOpt | PSymReq | PSymDefaultEmpty>(pType: T, validator: (value: symbol) => unknown): T & {
     validator: (value: symbol) => boolean;
 };
+declare const pStrOrNull: {
+    type: PropType<string | null>;
+    required: false;
+    default: string | null;
+    validator?: ((value: string | null) => boolean) | undefined;
+};
+declare const pNumOrNull: {
+    type: PropType<number | null>;
+    required: false;
+    default: number | null;
+    validator?: ((value: number | null) => boolean) | undefined;
+};
+declare const pBoolOrNull: {
+    type: PropType<boolean | null>;
+    required: false;
+    default: boolean | null;
+    validator?: ((value: boolean | null) => boolean) | undefined;
+};
+declare const pObjOrNull: {
+    type: PropType<Record<PropertyKey, unknown> | null>;
+    required: false;
+    default: Record<PropertyKey, unknown> | null;
+    validator?: ((value: Record<PropertyKey, unknown> | null) => boolean) | undefined;
+};
+declare const pArrOrNull: {
+    type: PropType<unknown[] | null>;
+    required: false;
+    default: unknown[] | null;
+    validator?: ((value: unknown[] | null) => boolean) | undefined;
+};
+declare const pFuncOrNull: {
+    type: PropType<((...any: unknown[]) => unknown) | null>;
+    required: false;
+    default: ((...any: unknown[]) => unknown) | null;
+    validator?: ((value: ((...any: unknown[]) => unknown) | null) => boolean) | undefined;
+};
+declare const pDateOrNull: {
+    type: PropType<Date | null>;
+    required: false;
+    default: Date | null;
+    validator?: ((value: Date | null) => boolean) | undefined;
+};
+declare const pSymOrNull: {
+    type: PropType<symbol | null>;
+    required: false;
+    default: symbol | null;
+    validator?: ((value: symbol | null) => boolean) | undefined;
+};
 declare const P: {
     Str: PStrOpt;
     Num: PNumOpt;
@@ -208,6 +256,14 @@ declare const P: {
     FuncDefaultIdentity: PFuncDefaultIdentity;
     DateDefaultNow: PDateDefaultNow;
     SymDefaultEmpty: PSymDefaultEmpty;
+    StrOrNull: typeof pStrOrNull;
+    NumOrNull: typeof pNumOrNull;
+    BoolOrNull: typeof pBoolOrNull;
+    ObjOrNull: typeof pObjOrNull;
+    ArrOrNull: typeof pArrOrNull;
+    FuncOrNull: typeof pFuncOrNull;
+    DateOrNull: typeof pDateOrNull;
+    SymOrNull: typeof pSymOrNull;
     Typed: PTypedOpt;
     TypedReq: PTypedReq;
     TypedDefault: PTypedDefault;
@@ -263,6 +319,14 @@ declare const P: {
     FDI: PFuncDefaultIdentity;
     DDN: PDateDefaultNow;
     YDE: PSymDefaultEmpty;
+    SON: typeof pStrOrNull;
+    NON: typeof pNumOrNull;
+    BON: typeof pBoolOrNull;
+    OON: typeof pObjOrNull;
+    AON: typeof pArrOrNull;
+    FON: typeof pFuncOrNull;
+    DON: typeof pDateOrNull;
+    YON: typeof pSymOrNull;
     TS: PTypedStrOpt;
     TSR: PTypedStrReq;
     TSD: PTypedStrDefault;
