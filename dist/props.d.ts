@@ -222,12 +222,25 @@ declare const pSymOrNull: {
     default: symbol | null;
     validator?: ((value: symbol | null) => boolean) | undefined;
 };
-declare function mutuallyExclusive<P extends Record<string, unknown>>({ props, prefix, message, throwError, }: {
-    props: P;
-    prefix?: string;
-    message?: string | null;
+type PropValidationErrorMessage<T> = null | string | ((props: Record<string, T>, defaultMessage: string) => string);
+declare function validateMultipleProps<T, R>(props: Record<string, T>, validate: (props: Record<string, T>) => unknown, { parse, throwError, message, defaultMessage, }?: {
+    parse?: ((props: Record<string, T>, valid: boolean) => R) | null;
     throwError?: boolean;
-}, ...propNames: Array<keyof P>): boolean;
+    message?: PropValidationErrorMessage<T>;
+    defaultMessage?: string;
+}): R;
+declare function requireAtLeastOneOf<T>(props: Record<string, T>, { throwError, message, }?: {
+    throwError?: boolean;
+    message?: PropValidationErrorMessage<T>;
+}): Record<string, T>;
+declare function requireAtMostOneOf<T>(props: Record<string, T>, { throwError, message, }?: {
+    throwError?: boolean;
+    message?: PropValidationErrorMessage<T>;
+}): [string, T];
+declare function requireExactlyOneOf<T>(props: Record<string, T>, { throwError, message, }?: {
+    throwError?: boolean;
+    message?: PropValidationErrorMessage<T>;
+}): [string, T];
 type P = {
     Str: PStrOpt;
     Num: PNumOpt;
@@ -352,7 +365,10 @@ type P = {
     TYR: PTypedSymReq;
     TYD: PTypedSymDefault;
     V: typeof pValidated;
-    mutuallyExclusive: typeof mutuallyExclusive;
+    validateMultipleProps: typeof validateMultipleProps;
+    requireAtLeastOneOf: typeof requireAtLeastOneOf;
+    requireAtMostOneOf: typeof requireAtMostOneOf;
+    requireExactlyOneOf: typeof requireExactlyOneOf;
 };
 declare const P: P;
 type PStrictDefaults = Omit<P, "Str" | "Num" | "Bool" | "Obj" | "Arr" | "Func" | "Date" | "Sym" | "S" | "N" | "B" | "O" | "A" | "F" | "D" | "Y"> & {

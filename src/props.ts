@@ -257,34 +257,102 @@ const pFuncOrNull = pTypedDefaultFn(Function)<
 const pDateOrNull = pTypedDefaultFn(Date)<Date | null>(null);
 const pSymOrNull = pTypedDefaultFn(Symbol)<symbol | null>(null);
 
-function mutuallyExclusive<P extends Record<string, unknown>>(
+type PropValidationErrorMessage<T> =
+  | null
+  | string
+  | ((props: Record<string, T>, defaultMessage: string) => string);
+
+function validateMultipleProps<T, R>(
+  props: Record<string, T>,
+  validate: (props: Record<string, T>) => unknown,
   {
-    props,
-    prefix = "",
-    message = null,
+    parse = null,
     throwError = true,
+    message = null,
+    defaultMessage = "Validation of props failed.",
   }: {
-    props: P;
-    prefix?: string;
-    message?: string | null;
+    parse?: ((props: Record<string, T>, valid: boolean) => R) | null;
     throwError?: boolean;
-  },
-  ...propNames: Array<keyof P>
-): boolean {
-  const invalid =
-    propNames
-      .map((name) => {
-        return Object.prototype.hasOwnProperty.call(props, name) && props[name];
-      })
-      .filter(Boolean).length > 1;
-  if (throwError && invalid) {
-    const fmtNames = propNames.map((name) => `"${name as string}"`).join(", ");
-    throw new Error(
-      message ??
-        `${prefix}Multiple of mutually-exclusive props ${fmtNames} were provided.`
-    );
+    message?: PropValidationErrorMessage<T>;
+    defaultMessage?: string;
+  } = {}
+): R {
+  const valid = !!validate(props);
+  if (!valid && throwError) {
+    let errorMessage = defaultMessage;
+    if (typeof message === "string") {
+      errorMessage = message;
+    } else if (typeof message === "function") {
+      errorMessage = message(props, defaultMessage);
+    }
+    throw new Error(errorMessage);
   }
-  return invalid;
+  return parse ? parse(props, valid) : (valid as R);
+}
+
+function requireAtLeastOneOf<T>(
+  props: Record<string, T>,
+  {
+    throwError = true,
+    message = null,
+  }: {
+    throwError?: boolean;
+    message?: PropValidationErrorMessage<T>;
+  } = {}
+): Record<string, T> {
+  const present = Object.entries(props).filter(([_key, value]) => value);
+  return validateMultipleProps(props, () => present.length >= 1, {
+    parse: () => Object.fromEntries(present),
+    throwError,
+    message,
+    defaultMessage:
+      `At least one of ${JSON.stringify(Object.keys(props))} props should be` +
+      " set, but none were.",
+  });
+}
+
+function requireAtMostOneOf<T>(
+  props: Record<string, T>,
+  {
+    throwError = true,
+    message = null,
+  }: {
+    throwError?: boolean;
+    message?: PropValidationErrorMessage<T>;
+  } = {}
+): [string, T] {
+  const present = Object.entries(props).filter(([_key, value]) => value);
+  return validateMultipleProps(props, () => present.length <= 1, {
+    parse: () => present[0],
+    throwError,
+    message,
+    defaultMessage:
+      `At most one of ${JSON.stringify(Object.keys(props))} props should be` +
+      " set at once, but multiple were.",
+  });
+}
+
+function requireExactlyOneOf<T>(
+  props: Record<string, T>,
+  {
+    throwError = true,
+    message = null,
+  }: {
+    throwError?: boolean;
+    message?: PropValidationErrorMessage<T>;
+  } = {}
+): [string, T] {
+  const present = Object.entries(props).filter(([_key, value]) => value);
+  const countDesc = present.length ? "multiple" : "none";
+  const defaultMessage =
+    `Exactly one of ${JSON.stringify(Object.keys(props))} props should be set` +
+    ` at once, but ${countDesc} were.`;
+  return validateMultipleProps(props, () => present.length === 1, {
+    parse: () => present[0],
+    throwError,
+    message,
+    defaultMessage,
+  });
 }
 
 type P = {
@@ -436,7 +504,10 @@ type P = {
 
   V: typeof pValidated;
 
-  mutuallyExclusive: typeof mutuallyExclusive;
+  validateMultipleProps: typeof validateMultipleProps;
+  requireAtLeastOneOf: typeof requireAtLeastOneOf;
+  requireAtMostOneOf: typeof requireAtMostOneOf;
+  requireExactlyOneOf: typeof requireExactlyOneOf;
 };
 const P: P = {
   Str: pStrOpt(),
@@ -587,7 +658,10 @@ const P: P = {
 
   V: pValidated,
 
-  mutuallyExclusive,
+  validateMultipleProps,
+  requireAtLeastOneOf,
+  requireAtMostOneOf,
+  requireExactlyOneOf,
 };
 
 type PStrictDefaults = Omit<

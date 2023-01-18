@@ -25,7 +25,11 @@ module.exports = {
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
       "warn",
-      { ignoreRestSiblings: true },
+      {
+        argsIgnorePattern: "^_", // ignore args/vars prefixed with underscore
+        varsIgnorePattern: "^_", // encourages more descriptive func signatures
+        ignoreRestSiblings: true,
+      },
       // `ignoreRestSiblings` allows easily "ommitting" key/value data from an object:
       // (see https://eslint.org/docs/rules/no-unused-vars#ignorerestsiblings)
     ],
