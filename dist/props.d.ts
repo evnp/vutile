@@ -1,5 +1,5 @@
 import { PropType } from "vue";
-import type { Prop } from "vue";
+import type { Prop, Ref } from "vue";
 declare function pTypedOptFn<BaseT>(base: BaseT): <PropT>(validator?: ((value: PropT) => unknown) | undefined) => {
     type: PropType<PropT>;
     required: false;
@@ -222,6 +222,7 @@ declare const pSymOrNull: {
     default: symbol | null;
     validator?: ((value: symbol | null) => boolean) | undefined;
 };
+declare function pick<T, R extends Record<PropertyKey, T>>(props: R, ...keys: Array<keyof R>): Record<string, Ref<T>>;
 type PropValidationErrorMessage<T> = null | string | ((props: Record<string, T>, defaultMessage: string) => string);
 declare function validateMultipleProps<T, R>(props: Record<string, T>, validate: (props: Record<string, T>) => unknown, { parse, throwError, message, defaultMessage, }?: {
     parse?: ((props: Record<string, T>, valid: boolean) => R) | null;
@@ -365,6 +366,7 @@ type P = {
     TYR: PTypedSymReq;
     TYD: PTypedSymDefault;
     V: typeof pValidated;
+    pick: typeof pick;
     validateMultipleProps: typeof validateMultipleProps;
     requireAtLeastOneOf: typeof requireAtLeastOneOf;
     requireAtMostOneOf: typeof requireAtMostOneOf;

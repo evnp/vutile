@@ -1,5 +1,5 @@
-import { PropType } from "vue";
-import type { Prop } from "vue";
+import { PropType, toRefs, isRef } from "vue";
+import type { Prop, Ref } from "vue";
 
 // P ~ a DSL for compact-yet-explicit, type-aware Vue component prop definitions
 
@@ -257,6 +257,13 @@ const pFuncOrNull = pTypedDefaultFn(Function)<
 const pDateOrNull = pTypedDefaultFn(Date)<Date | null>(null);
 const pSymOrNull = pTypedDefaultFn(Symbol)<symbol | null>(null);
 
+function pick<T, R extends Record<PropertyKey, T>>(
+  props: R,
+  ...keys: Array<keyof R>
+): Record<string, Ref<T>> {
+  return toRefs(Object.fromEntries(keys.map((k) => [k, props[k]])));
+}
+
 type PropValidationErrorMessage<T> =
   | null
   | string
@@ -300,7 +307,9 @@ function requireAtLeastOneOf<T>(
     message?: PropValidationErrorMessage<T>;
   } = {}
 ): Record<string, T> {
-  const present = Object.entries(props).filter(([_key, value]) => value);
+  const present = Object.entries(props).filter(([_key, prop]) =>
+    isRef(prop) ? prop.value : prop
+  );
   return validateMultipleProps(props, () => present.length >= 1, {
     parse: () => Object.fromEntries(present),
     throwError,
@@ -321,7 +330,9 @@ function requireAtMostOneOf<T>(
     message?: PropValidationErrorMessage<T>;
   } = {}
 ): [string, T] {
-  const present = Object.entries(props).filter(([_key, value]) => value);
+  const present = Object.entries(props).filter(([_key, prop]) =>
+    isRef(prop) ? prop.value : prop
+  );
   return validateMultipleProps(props, () => present.length <= 1, {
     parse: () => present[0],
     throwError,
@@ -342,7 +353,9 @@ function requireExactlyOneOf<T>(
     message?: PropValidationErrorMessage<T>;
   } = {}
 ): [string, T] {
-  const present = Object.entries(props).filter(([_key, value]) => value);
+  const present = Object.entries(props).filter(([_key, prop]) =>
+    isRef(prop) ? prop.value : prop
+  );
   const countDesc = present.length ? "multiple" : "none";
   const defaultMessage =
     `Exactly one of ${JSON.stringify(Object.keys(props))} props should be set` +
@@ -504,6 +517,7 @@ type P = {
 
   V: typeof pValidated;
 
+  pick: typeof pick;
   validateMultipleProps: typeof validateMultipleProps;
   requireAtLeastOneOf: typeof requireAtLeastOneOf;
   requireAtMostOneOf: typeof requireAtMostOneOf;
@@ -658,6 +672,7 @@ const P: P = {
 
   V: pValidated,
 
+  pick,
   validateMultipleProps,
   requireAtLeastOneOf,
   requireAtMostOneOf,
