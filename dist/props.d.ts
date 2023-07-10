@@ -1,21 +1,24 @@
 import { PropType } from "vue";
 import type { Prop, Ref } from "vue";
-declare function pTypedOptFn<BaseT>(base: BaseT): <PropT>(validator?: ((value: PropT) => unknown) | undefined) => {
-    type: PropType<PropT>;
+type PTypedOptFnReturnType<T> = {
+    type: PropType<T>;
     required: false;
-    validator?: ((value: PropT) => boolean) | undefined;
+    validator?: (value: T) => boolean;
 };
-declare function pTypedReqFn<BaseT>(base: BaseT): <PropT>(validator?: ((value: PropT) => unknown) | undefined) => {
-    type: PropType<PropT>;
+declare function pTypedOptFn<BaseT>(base: BaseT): <PropT>(validator?: ((value: PropT) => unknown) | undefined) => PTypedOptFnReturnType<PropT>;
+type PTypedReqFnReturnType<T> = {
+    type: PropType<T>;
     required: true;
-    validator?: ((value: PropT) => boolean) | undefined;
+    validator?: (value: T) => boolean;
 };
-declare function pTypedDefaultFn<BaseT>(base: BaseT): <PropT = BaseT>(dflt: PropT, validator?: ((value: PropT) => unknown) | undefined) => {
-    type: PropType<PropT>;
+declare function pTypedReqFn<BaseT>(base: BaseT): <PropT>(validator?: ((value: PropT) => unknown) | undefined) => PTypedReqFnReturnType<PropT>;
+type PTypedDefaultFnReturnType<T> = {
+    type: PropType<T>;
     required: false;
-    default: PropT;
-    validator?: ((value: PropT) => boolean) | undefined;
+    default: T;
+    validator?: (value: T) => boolean;
 };
+declare function pTypedDefaultFn<BaseT>(base: BaseT): <PropT = BaseT>(dflt: PropT, validator?: ((value: PropT) => unknown) | undefined) => PTypedDefaultFnReturnType<PropT>;
 declare const pStrOpt: () => Prop<string, string> & {
     required: false;
 };
@@ -135,6 +138,9 @@ type PTypedDefault = typeof pTypedDefaultFn;
 type PTypedStrOpt = ReturnType<typeof pTypedOptFn>;
 type PTypedStrReq = ReturnType<typeof pTypedReqFn>;
 type PTypedStrDefault = ReturnType<typeof pTypedDefaultFn>;
+type PTypedNumOpt = ReturnType<typeof pTypedOptFn>;
+type PTypedNumReq = ReturnType<typeof pTypedReqFn>;
+type PTypedNumDefault = ReturnType<typeof pTypedDefaultFn>;
 type PTypedObjOpt = ReturnType<typeof pTypedOptFn>;
 type PTypedObjReq = ReturnType<typeof pTypedReqFn>;
 type PTypedObjDefault = ReturnType<typeof pTypedDefaultFn>;
@@ -174,54 +180,14 @@ declare function pValidated<T extends PDateOpt | PDateReq | PDateDefaultNow>(pTy
 declare function pValidated<T extends PSymOpt | PSymReq | PSymDefaultEmpty>(pType: T, validator: (value: symbol) => unknown): T & {
     validator: (value: symbol) => boolean;
 };
-declare const pStrOrNull: {
-    type: PropType<string | null>;
-    required: false;
-    default: string | null;
-    validator?: ((value: string | null) => boolean) | undefined;
-};
-declare const pNumOrNull: {
-    type: PropType<number | null>;
-    required: false;
-    default: number | null;
-    validator?: ((value: number | null) => boolean) | undefined;
-};
-declare const pBoolOrNull: {
-    type: PropType<boolean | null>;
-    required: false;
-    default: boolean | null;
-    validator?: ((value: boolean | null) => boolean) | undefined;
-};
-declare const pObjOrNull: {
-    type: PropType<Record<PropertyKey, unknown> | null>;
-    required: false;
-    default: Record<PropertyKey, unknown> | null;
-    validator?: ((value: Record<PropertyKey, unknown> | null) => boolean) | undefined;
-};
-declare const pArrOrNull: {
-    type: PropType<unknown[] | null>;
-    required: false;
-    default: unknown[] | null;
-    validator?: ((value: unknown[] | null) => boolean) | undefined;
-};
-declare const pFuncOrNull: {
-    type: PropType<((...any: unknown[]) => unknown) | null>;
-    required: false;
-    default: ((...any: unknown[]) => unknown) | null;
-    validator?: ((value: ((...any: unknown[]) => unknown) | null) => boolean) | undefined;
-};
-declare const pDateOrNull: {
-    type: PropType<Date | null>;
-    required: false;
-    default: Date | null;
-    validator?: ((value: Date | null) => boolean) | undefined;
-};
-declare const pSymOrNull: {
-    type: PropType<symbol | null>;
-    required: false;
-    default: symbol | null;
-    validator?: ((value: symbol | null) => boolean) | undefined;
-};
+declare const pStrOrNull: PTypedDefaultFnReturnType<string | null>;
+declare const pNumOrNull: PTypedDefaultFnReturnType<number | null>;
+declare const pBoolOrNull: PTypedDefaultFnReturnType<boolean | null>;
+declare const pObjOrNull: PTypedDefaultFnReturnType<Record<PropertyKey, unknown> | null>;
+declare const pArrOrNull: PTypedDefaultFnReturnType<unknown[] | null>;
+declare const pFuncOrNull: PTypedDefaultFnReturnType<((...any: unknown[]) => unknown) | null>;
+declare const pDateOrNull: PTypedDefaultFnReturnType<Date | null>;
+declare const pSymOrNull: PTypedDefaultFnReturnType<symbol | null>;
 declare function pick<T, R extends Record<PropertyKey, T>>(props: R, ...keys: Array<keyof R>): Record<string, Ref<T>>;
 type PropValidationErrorMessage<T> = null | string | ((props: Record<string, T>, defaultMessage: string) => string);
 declare function validateMultipleProps<T, R>(props: Record<string, T>, validate: (props: Record<string, T>) => unknown, { parse, throwError, message, defaultMessage, }?: {
@@ -242,7 +208,23 @@ declare function requireExactlyOneOf<T>(props: Record<string, T>, { throwError, 
     throwError?: boolean;
     message?: PropValidationErrorMessage<T>;
 }): [string, T];
+declare function str(dflt: string): ReturnType<PStrDefault>;
+declare function str(dflt?: string): PStrOpt;
+declare namespace str {
+    var req: typeof strReq;
+    var typed: typeof strTyped;
+}
+declare function strReq(): PStrReq;
+declare function strTyped<T>(): PTypedOptFnReturnType<T>;
+declare function strTyped<T>(dflt: T): PTypedDefaultFnReturnType<T>;
+declare function strStrictDefault(): PStrOpt;
+declare function strStrictDefault(dflt: string): ReturnType<PStrDefault>;
+declare namespace strStrictDefault {
+    var req: typeof strReq;
+    var typed: typeof strTyped;
+}
 type P = {
+    str: typeof str;
     Str: PStrOpt;
     Num: PNumOpt;
     Bool: PBoolOpt;
@@ -290,6 +272,9 @@ type P = {
     TypedStr: PTypedStrOpt;
     TypedStrReq: PTypedStrReq;
     TypedStrDefault: PTypedStrDefault;
+    TypedNum: PTypedNumOpt;
+    TypedNumReq: PTypedNumReq;
+    TypedNumDefault: PTypedNumDefault;
     TypedObj: PTypedObjOpt;
     TypedObjReq: PTypedObjReq;
     TypedObjDefault: PTypedObjDefault;
@@ -350,6 +335,9 @@ type P = {
     TS: PTypedStrOpt;
     TSR: PTypedStrReq;
     TSD: PTypedStrDefault;
+    TN: PTypedNumOpt;
+    TNR: PTypedNumReq;
+    TND: PTypedNumDefault;
     TO: PTypedObjOpt;
     TOR: PTypedObjReq;
     TOD: PTypedObjDefault;
@@ -373,7 +361,8 @@ type P = {
     requireExactlyOneOf: typeof requireExactlyOneOf;
 };
 declare const P: P;
-type PStrictDefaults = Omit<P, "Str" | "Num" | "Bool" | "Obj" | "Arr" | "Func" | "Date" | "Sym" | "S" | "N" | "B" | "O" | "A" | "F" | "D" | "Y"> & {
+type PStrictDefaults = Omit<P, "str" | "Str" | "Num" | "Bool" | "Obj" | "Arr" | "Func" | "Date" | "Sym" | "S" | "N" | "B" | "O" | "A" | "F" | "D" | "Y"> & {
+    str: typeof strStrictDefault;
     Str: typeof pStrOrNull;
     Num: typeof pNumOrNull;
     Bool: PBoolDefaultFalse;

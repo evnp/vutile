@@ -52,12 +52,16 @@ function pDefaultFn<T>(pType: PType) {
   };
 }
 
+type PTypedOptFnReturnType<T> = {
+  type: PropType<T>;
+  required: false;
+  validator?: (value: T) => boolean;
+};
+
 function pTypedOptFn<BaseT>(base: BaseT) {
-  return function <PropT>(validator?: (value: PropT) => unknown): {
-    type: PropType<PropT>;
-    required: false;
-    validator?: (value: PropT) => boolean;
-  } {
+  return function <PropT>(
+    validator?: (value: PropT) => unknown
+  ): PTypedOptFnReturnType<PropT> {
     return {
       type: base as unknown as PropType<PropT>,
       required: false,
@@ -66,12 +70,16 @@ function pTypedOptFn<BaseT>(base: BaseT) {
   };
 }
 
+type PTypedReqFnReturnType<T> = {
+  type: PropType<T>;
+  required: true;
+  validator?: (value: T) => boolean;
+};
+
 function pTypedReqFn<BaseT>(base: BaseT) {
-  return function <PropT>(validator?: (value: PropT) => unknown): {
-    type: PropType<PropT>;
-    required: true;
-    validator?: (value: PropT) => boolean;
-  } {
+  return function <PropT>(
+    validator?: (value: PropT) => unknown
+  ): PTypedReqFnReturnType<PropT> {
     return {
       type: base as unknown as PropType<PropT>,
       required: true,
@@ -80,16 +88,18 @@ function pTypedReqFn<BaseT>(base: BaseT) {
   };
 }
 
+type PTypedDefaultFnReturnType<T> = {
+  type: PropType<T>;
+  required: false;
+  default: T;
+  validator?: (value: T) => boolean;
+};
+
 function pTypedDefaultFn<BaseT>(base: BaseT) {
   return function <PropT = BaseT>(
     dflt: PropT,
     validator?: (value: PropT) => unknown
-  ): {
-    type: PropType<PropT>;
-    required: false;
-    default: PropT;
-    validator?: (value: PropT) => boolean;
-  } {
+  ): PTypedDefaultFnReturnType<PropT> {
     return {
       type: base as unknown as PropType<PropT>,
       required: false,
@@ -182,6 +192,10 @@ type PTypedDefault = typeof pTypedDefaultFn;
 type PTypedStrOpt = ReturnType<typeof pTypedOptFn>;
 type PTypedStrReq = ReturnType<typeof pTypedReqFn>;
 type PTypedStrDefault = ReturnType<typeof pTypedDefaultFn>;
+
+type PTypedNumOpt = ReturnType<typeof pTypedOptFn>;
+type PTypedNumReq = ReturnType<typeof pTypedReqFn>;
+type PTypedNumDefault = ReturnType<typeof pTypedDefaultFn>;
 
 type PTypedObjOpt = ReturnType<typeof pTypedOptFn>;
 type PTypedObjReq = ReturnType<typeof pTypedReqFn>;
@@ -368,7 +382,44 @@ function requireExactlyOneOf<T>(
   });
 }
 
+function str(dflt: string): ReturnType<PStrDefault>;
+function str(dflt?: string): PStrOpt;
+function str(dflt?: string): unknown {
+  return arguments.length ? pStrDefault(dflt as string) : pStrOpt();
+}
+function strReq(): PStrReq {
+  return pStrReq();
+}
+function strTyped<T>(): PTypedOptFnReturnType<T>;
+function strTyped<T>(dflt: T): PTypedDefaultFnReturnType<T>;
+function strTyped<T>(dflt?: T): unknown {
+  return arguments.length
+    ? pTypedDefaultFn(String)<T>(dflt as T)
+    : pTypedOptFn(String)<T>();
+}
+function strReqTyped<T>(): PTypedReqFnReturnType<T> {
+  return pTypedReqFn(String)<T>();
+}
+str.req = strReq;
+str.typed = strTyped;
+(str.req as unknown as { typed: typeof strReqTyped }).typed = strReqTyped;
+(str.typed as unknown as { req: typeof strReqTyped }).req = strReqTyped;
+
+function strStrictDefault(): PStrOpt;
+function strStrictDefault(dflt: string): ReturnType<PStrDefault>;
+function strStrictDefault(dflt?: string): unknown {
+  return arguments.length ? pStrDefault(dflt as string) : pStrOrNull;
+}
+strStrictDefault.req = strReq;
+strStrictDefault.typed = strTyped;
+(strStrictDefault.req as unknown as { typed: typeof strReqTyped }).typed =
+  strReqTyped;
+(strStrictDefault.typed as unknown as { req: typeof strReqTyped }).req =
+  strReqTyped;
+
 type P = {
+  str: typeof str;
+
   Str: PStrOpt;
   Num: PNumOpt;
   Bool: PBoolOpt;
@@ -422,6 +473,10 @@ type P = {
   TypedStr: PTypedStrOpt;
   TypedStrReq: PTypedStrReq;
   TypedStrDefault: PTypedStrDefault;
+
+  TypedNum: PTypedNumOpt;
+  TypedNumReq: PTypedNumReq;
+  TypedNumDefault: PTypedNumDefault;
 
   TypedObj: PTypedObjOpt;
   TypedObjReq: PTypedObjReq;
@@ -495,6 +550,10 @@ type P = {
   TSR: PTypedStrReq;
   TSD: PTypedStrDefault;
 
+  TN: PTypedNumOpt;
+  TNR: PTypedNumReq;
+  TND: PTypedNumDefault;
+
   TO: PTypedObjOpt;
   TOR: PTypedObjReq;
   TOD: PTypedObjDefault;
@@ -524,6 +583,8 @@ type P = {
   requireExactlyOneOf: typeof requireExactlyOneOf;
 };
 const P: P = {
+  str,
+
   Str: pStrOpt(),
   Num: pNumOpt(),
   Bool: pBoolOpt(),
@@ -577,6 +638,10 @@ const P: P = {
   TypedStr: pTypedOptFn(String),
   TypedStrReq: pTypedReqFn(String),
   TypedStrDefault: pTypedDefaultFn(String),
+
+  TypedNum: pTypedOptFn(Number),
+  TypedNumReq: pTypedReqFn(Number),
+  TypedNumDefault: pTypedDefaultFn(Number),
 
   TypedObj: pTypedOptFn(Object),
   TypedObjReq: pTypedReqFn(Object),
@@ -650,6 +715,10 @@ const P: P = {
   TSR: pTypedReqFn(String),
   TSD: pTypedDefaultFn(String),
 
+  TN: pTypedOptFn(Number),
+  TNR: pTypedReqFn(Number),
+  TND: pTypedDefaultFn(Number),
+
   TO: pTypedOptFn(Object),
   TOR: pTypedReqFn(Object),
   TOD: pTypedDefaultFn(Object),
@@ -681,6 +750,7 @@ const P: P = {
 
 type PStrictDefaults = Omit<
   P,
+  | "str"
   | "Str"
   | "Num"
   | "Bool"
@@ -698,6 +768,7 @@ type PStrictDefaults = Omit<
   | "D"
   | "Y"
 > & {
+  str: typeof strStrictDefault;
   Str: typeof pStrOrNull;
   Num: typeof pNumOrNull;
   Bool: PBoolDefaultFalse;
@@ -717,6 +788,7 @@ type PStrictDefaults = Omit<
 };
 const PStrictDefaults: PStrictDefaults = {
   ...P,
+  str: strStrictDefault,
   Str: pStrOrNull,
   Num: pNumOrNull,
   Bool: pBoolDefaultFalse,
