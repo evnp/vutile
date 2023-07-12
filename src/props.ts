@@ -136,18 +136,6 @@ const pFuncDefault = pDefaultFn<(...args: unknown[]) => unknown>(Function);
 const pDateDefault = pDefaultFn<Date>(Date);
 const pSymDefault = pDefaultFn<symbol>(Symbol);
 
-const pStrDefaultEmpty = pDefaultFn<string>(String)("");
-const pNumDefaultZero = pDefaultFn<number>(Number)(0);
-const pBoolDefaultFalse = pDefaultFn<boolean>(Boolean)(false);
-const pBoolDefaultTrue = pDefaultFn<boolean>(Boolean)(true);
-const pObjDefaultEmpty = pDefaultFn<object>(Object)({});
-const pArrDefaultEmpty = pDefaultFn<unknown[]>(Array)([]);
-const pFuncDefaultIdentity = pDefaultFn<(...args: unknown[]) => unknown>(
-  Function
-)((x) => x);
-const pDateDefaultNow = pDefaultFn<Date>(Date)(new Date());
-const pSymDefaultEmpty = pDefaultFn<symbol>(Symbol)(Symbol());
-
 type PStrOpt = ReturnType<typeof pStrOpt>;
 type PNumOpt = ReturnType<typeof pNumOpt>;
 type PBoolOpt = ReturnType<typeof pBoolOpt>;
@@ -175,92 +163,10 @@ type PFuncDefault = typeof pFuncDefault;
 type PDateDefault = typeof pDateDefault;
 type PSymDefault = typeof pSymDefault;
 
-type PStrDefaultEmpty = ReturnType<typeof pStrDefault>;
-type PNumDefaultZero = ReturnType<typeof pNumDefault>;
-type PBoolDefaultFalse = ReturnType<typeof pBoolDefault>;
-type PBoolDefaultTrue = ReturnType<typeof pBoolDefault>;
-type PObjDefaultEmpty = ReturnType<typeof pObjDefault>;
-type PArrDefaultEmpty = ReturnType<typeof pArrDefault>;
-type PFuncDefaultIdentity = ReturnType<typeof pFuncDefault>;
-type PDateDefaultNow = ReturnType<typeof pDateDefault>;
-type PSymDefaultEmpty = ReturnType<typeof pSymDefault>;
-
-type PTypedOpt = typeof pTypedOptFn;
-type PTypedReq = typeof pTypedReqFn;
-type PTypedDefault = typeof pTypedDefaultFn;
-
-type PTypedStrOpt = ReturnType<typeof pTypedOptFn>;
-type PTypedStrReq = ReturnType<typeof pTypedReqFn>;
-type PTypedStrDefault = ReturnType<typeof pTypedDefaultFn>;
-
-type PTypedNumOpt = ReturnType<typeof pTypedOptFn>;
-type PTypedNumReq = ReturnType<typeof pTypedReqFn>;
-type PTypedNumDefault = ReturnType<typeof pTypedDefaultFn>;
-
-type PTypedObjOpt = ReturnType<typeof pTypedOptFn>;
-type PTypedObjReq = ReturnType<typeof pTypedReqFn>;
-type PTypedObjDefault = ReturnType<typeof pTypedDefaultFn>;
-
-type PTypedArrOpt = ReturnType<typeof pTypedOptFn>;
-type PTypedArrReq = ReturnType<typeof pTypedReqFn>;
-type PTypedArrDefault = ReturnType<typeof pTypedDefaultFn>;
-
-type PTypedFuncOpt = ReturnType<typeof pTypedOptFn>;
-type PTypedFuncReq = ReturnType<typeof pTypedReqFn>;
-type PTypedFuncDefault = ReturnType<typeof pTypedDefaultFn>;
-
-type PTypedDateOpt = ReturnType<typeof pTypedOptFn>;
-type PTypedDateReq = ReturnType<typeof pTypedReqFn>;
-type PTypedDateDefault = ReturnType<typeof pTypedDefaultFn>;
-
-type PTypedSymOpt = ReturnType<typeof pTypedOptFn>;
-type PTypedSymReq = ReturnType<typeof pTypedReqFn>;
-type PTypedSymDefault = ReturnType<typeof pTypedDefaultFn>;
-
-function pValidated<T extends PStrOpt | PStrReq | PStrDefaultEmpty>(
-  pType: T,
-  validator: (value: string) => unknown
-): T & { validator: (value: string) => boolean };
-function pValidated<T extends PNumOpt | PNumReq | PNumDefaultZero>(
-  pType: T,
-  validator: (value: number) => unknown
-): T & { validator: (value: number) => boolean };
-function pValidated<
-  T extends PBoolOpt | PBoolReq | PBoolDefaultFalse | PBoolDefaultTrue
->(
-  pType: T,
-  validator: (value: boolean) => unknown
-): T & { validator: (value: boolean) => boolean };
-function pValidated<T extends PObjOpt | PObjReq | PObjDefaultEmpty>(
-  pType: T,
-  validator: (value: Record<PropertyKey, unknown>) => unknown
-): T & { validator: (value: Array<unknown>) => boolean };
-function pValidated<T extends PArrOpt | PArrReq | PArrDefaultEmpty>(
-  pType: T,
-  validator: (value: Array<unknown>) => unknown
-): T & { validator: (value: Array<unknown>) => boolean };
-function pValidated<T extends PFuncOpt | PFuncReq | PFuncDefaultIdentity>(
-  pType: T,
-  validator: (value: (...any: unknown[]) => unknown) => unknown
-): T & { validator: (value: (...any: unknown[]) => unknown) => boolean };
-function pValidated<T extends PDateOpt | PDateReq | PDateDefaultNow>(
-  pType: T,
-  validator: (value: Date) => unknown
-): T & { validator: (value: Date) => boolean };
-function pValidated<T extends PSymOpt | PSymReq | PSymDefaultEmpty>(
-  pType: T,
-  validator: (value: symbol) => unknown
-): T & { validator: (value: symbol) => boolean };
-function pValidated(pType: object, validator: unknown) {
-  return {
-    ...pType,
-    validator: castReturnValueToBoolean(validator),
-  };
-}
-
 const pStrOrNull = pTypedDefaultFn(String)<string | null>(null);
 const pNumOrNull = pTypedDefaultFn(Number)<number | null>(null);
-const pBoolOrNull = pTypedDefaultFn(Boolean)<boolean | null>(null);
+const pBoolDefaultFalse = pDefaultFn<boolean>(Boolean)(false);
+
 const pObjOrNull = pTypedDefaultFn(Object)<Record<PropertyKey, unknown> | null>(
   null
 );
@@ -382,8 +288,10 @@ function requireExactlyOneOf<T>(
   });
 }
 
+// TODO: add prop validator support to the interfaces below
+
+function str(): PStrOpt;
 function str(dflt: string): ReturnType<PStrDefault>;
-function str(dflt?: string): PStrOpt;
 function str(dflt?: string): unknown {
   return arguments.length ? pStrDefault(dflt as string) : pStrOpt();
 }
@@ -400,181 +308,236 @@ function strTyped<T>(dflt?: T): unknown {
 function strReqTyped<T>(): PTypedReqFnReturnType<T> {
   return pTypedReqFn(String)<T>();
 }
-str.req = strReq;
-str.typed = strTyped;
-(str.req as unknown as { typed: typeof strReqTyped }).typed = strReqTyped;
-(str.typed as unknown as { req: typeof strReqTyped }).req = strReqTyped;
-
-function strStrictDefault(): PStrOpt;
+str.req = strReq as typeof strReq & { typed: typeof strReqTyped };
+str.typed = strTyped as typeof strTyped & { req: typeof strReqTyped };
+str.req.typed = strReqTyped;
+str.typed.req = strReqTyped;
+function strStrictDefault(): typeof pStrOrNull;
 function strStrictDefault(dflt: string): ReturnType<PStrDefault>;
 function strStrictDefault(dflt?: string): unknown {
   return arguments.length ? pStrDefault(dflt as string) : pStrOrNull;
 }
-strStrictDefault.req = strReq;
-strStrictDefault.typed = strTyped;
-(strStrictDefault.req as unknown as { typed: typeof strReqTyped }).typed =
-  strReqTyped;
-(strStrictDefault.typed as unknown as { req: typeof strReqTyped }).req =
-  strReqTyped;
+strStrictDefault.req = str.req;
+strStrictDefault.typed = str.typed;
+
+function num(): PNumOpt;
+function num(dflt: number): ReturnType<PNumDefault>;
+function num(dflt?: number): unknown {
+  return arguments.length ? pNumDefault(dflt as number) : pNumOpt();
+}
+function numReq(): PNumReq {
+  return pNumReq();
+}
+function numTyped<T>(): PTypedOptFnReturnType<T>;
+function numTyped<T>(dflt: T): PTypedDefaultFnReturnType<T>;
+function numTyped<T>(dflt?: T): unknown {
+  return arguments.length
+    ? pTypedDefaultFn(Number)<T>(dflt as T)
+    : pTypedOptFn(Number)<T>();
+}
+function numReqTyped<T>(): PTypedReqFnReturnType<T> {
+  return pTypedReqFn(Number)<T>();
+}
+num.req = numReq as typeof numReq & { typed: typeof numReqTyped };
+num.typed = numTyped as typeof numTyped & { req: typeof numReqTyped };
+num.req.typed = numReqTyped;
+num.typed.req = numReqTyped;
+function numStrictDefault(): typeof pNumOrNull;
+function numStrictDefault(dflt: number): ReturnType<PNumDefault>;
+function numStrictDefault(dflt?: number): unknown {
+  return arguments.length ? pNumDefault(dflt as number) : pNumOrNull;
+}
+numStrictDefault.req = num.req;
+numStrictDefault.typed = num.typed;
+
+function bool(): PBoolOpt;
+function bool(dflt: boolean): ReturnType<PBoolDefault>;
+function bool(dflt?: boolean): unknown {
+  return arguments.length ? pBoolDefault(dflt as boolean) : pBoolOpt();
+}
+function boolReq(): PBoolReq {
+  return pBoolReq();
+}
+function boolTyped<T>(): PTypedOptFnReturnType<T>;
+function boolTyped<T>(dflt: T): PTypedDefaultFnReturnType<T>;
+function boolTyped<T>(dflt?: T): unknown {
+  return arguments.length
+    ? pTypedDefaultFn(Boolean)<T>(dflt as T)
+    : pTypedOptFn(Boolean)<T>();
+}
+function boolReqTyped<T>(): PTypedReqFnReturnType<T> {
+  return pTypedReqFn(Boolean)<T>();
+}
+bool.req = boolReq as typeof boolReq & { typed: typeof boolReqTyped };
+bool.typed = boolTyped as typeof boolTyped & { req: typeof boolReqTyped };
+bool.req.typed = boolReqTyped;
+bool.typed.req = boolReqTyped;
+function boolStrictDefault(): ReturnType<typeof pBoolDefault>;
+function boolStrictDefault(dflt: boolean): ReturnType<PBoolDefault>;
+function boolStrictDefault(dflt?: boolean): unknown {
+  return arguments.length ? pBoolDefault(dflt as boolean) : pBoolDefaultFalse;
+}
+boolStrictDefault.req = bool.req;
+boolStrictDefault.typed = bool.typed;
+
+function obj(): PObjOpt;
+function obj(dflt: object): ReturnType<PObjDefault>;
+function obj(dflt?: object): unknown {
+  return arguments.length ? pObjDefault(dflt as object) : pObjOpt();
+}
+function objReq(): PObjReq {
+  return pObjReq();
+}
+function objTyped<T>(): PTypedOptFnReturnType<T>;
+function objTyped<T>(dflt: T): PTypedDefaultFnReturnType<T>;
+function objTyped<T>(dflt?: T): unknown {
+  return arguments.length
+    ? pTypedDefaultFn(Object)<T>(dflt as T)
+    : pTypedOptFn(Object)<T>();
+}
+function objReqTyped<T>(): PTypedReqFnReturnType<T> {
+  return pTypedReqFn(Object)<T>();
+}
+obj.req = objReq as typeof objReq & { typed: typeof objReqTyped };
+obj.typed = objTyped as typeof objTyped & { req: typeof objReqTyped };
+obj.req.typed = objReqTyped;
+obj.typed.req = objReqTyped;
+function objStrictDefault(): typeof pObjOrNull;
+function objStrictDefault(dflt: object): ReturnType<PObjDefault>;
+function objStrictDefault(dflt?: object): unknown {
+  return arguments.length ? pObjDefault(dflt as object) : pObjOrNull;
+}
+objStrictDefault.req = obj.req;
+objStrictDefault.typed = obj.typed;
+
+function arr(): PArrOpt;
+function arr(dflt: unknown[]): ReturnType<PArrDefault>;
+function arr(dflt?: unknown[]): unknown {
+  return arguments.length ? pArrDefault(dflt as unknown[]) : pArrOpt();
+}
+function arrReq(): PArrReq {
+  return pArrReq();
+}
+function arrTyped<T>(): PTypedOptFnReturnType<T>;
+function arrTyped<T>(dflt: T): PTypedDefaultFnReturnType<T>;
+function arrTyped<T>(dflt?: T): unknown {
+  return arguments.length
+    ? pTypedDefaultFn(Array)<T>(dflt as T)
+    : pTypedOptFn(Array)<T>();
+}
+function arrReqTyped<T>(): PTypedReqFnReturnType<T> {
+  return pTypedReqFn(Array)<T>();
+}
+arr.req = arrReq as typeof arrReq & { typed: typeof arrReqTyped };
+arr.typed = arrTyped as typeof arrTyped & { req: typeof arrReqTyped };
+arr.req.typed = arrReqTyped;
+function arrStrictDefault(): typeof pArrOrNull;
+function arrStrictDefault(dflt: unknown[]): ReturnType<PArrDefault>;
+function arrStrictDefault(dflt?: unknown[]): unknown {
+  return arguments.length ? pArrDefault(dflt as unknown[]) : pArrOrNull;
+}
+arrStrictDefault.req = arr.req;
+arrStrictDefault.typed = arr.typed;
+
+type GenericFunction = (...args: unknown[]) => unknown;
+function func(): PFuncOpt;
+function func(dflt: GenericFunction): ReturnType<PFuncDefault>;
+function func(dflt?: GenericFunction): unknown {
+  return arguments.length ? pFuncDefault(dflt as GenericFunction) : pFuncOpt();
+}
+function funcReq(): PFuncReq {
+  return pFuncReq();
+}
+function funcTyped<T>(): PTypedOptFnReturnType<T>;
+function funcTyped<T>(dflt: T): PTypedDefaultFnReturnType<T>;
+function funcTyped<T>(dflt?: T): unknown {
+  return arguments.length
+    ? pTypedDefaultFn(Function)<T>(dflt as T)
+    : pTypedOptFn(Function)<T>();
+}
+function funcReqTyped<T>(): PTypedReqFnReturnType<T> {
+  return pTypedReqFn(Function)<T>();
+}
+func.req = funcReq as typeof funcReq & { typed: typeof funcReqTyped };
+func.typed = funcTyped as typeof funcTyped & { req: typeof funcReqTyped };
+func.req.typed = funcReqTyped;
+function funcStrictDefault(): typeof pFuncOrNull;
+function funcStrictDefault(dflt: GenericFunction): ReturnType<PFuncDefault>;
+function funcStrictDefault(dflt?: GenericFunction): unknown {
+  return arguments.length ? pFuncDefault(dflt as GenericFunction) : pFuncOrNull;
+}
+funcStrictDefault.req = func.req;
+funcStrictDefault.typed = func.typed;
+
+function date(): PDateOpt;
+function date(dflt: Date): ReturnType<PDateDefault>;
+function date(dflt?: Date): unknown {
+  return arguments.length ? pDateDefault(dflt as Date) : pDateOpt();
+}
+function dateReq(): PDateReq {
+  return pDateReq();
+}
+function dateTyped<T>(): PTypedOptFnReturnType<T>;
+function dateTyped<T>(dflt: T): PTypedDefaultFnReturnType<T>;
+function dateTyped<T>(dflt?: T): unknown {
+  return arguments.length
+    ? pTypedDefaultFn(Date)<T>(dflt as T)
+    : pTypedOptFn(Date)<T>();
+}
+function dateReqTyped<T>(): PTypedReqFnReturnType<T> {
+  return pTypedReqFn(Date)<T>();
+}
+date.req = dateReq as typeof dateReq & { typed: typeof dateReqTyped };
+date.typed = dateTyped as typeof dateTyped & { req: typeof dateReqTyped };
+date.req.typed = dateReqTyped;
+date.typed.req = dateReqTyped;
+function dateStrictDefault(): typeof pDateOrNull;
+function dateStrictDefault(dflt: Date): ReturnType<PDateDefault>;
+function dateStrictDefault(dflt?: Date): unknown {
+  return arguments.length ? pDateDefault(dflt as Date) : pDateOrNull;
+}
+dateStrictDefault.req = date.req;
+dateStrictDefault.typed = date.typed;
+
+function sym(): PSymOpt;
+function sym(dflt: symbol): ReturnType<PSymDefault>;
+function sym(dflt?: symbol): unknown {
+  return arguments.length ? pSymDefault(dflt as symbol) : pSymOpt();
+}
+function symReq(): PSymReq {
+  return pSymReq();
+}
+function symTyped<T>(): PTypedOptFnReturnType<T>;
+function symTyped<T>(dflt: T): PTypedDefaultFnReturnType<T>;
+function symTyped<T>(dflt?: T): unknown {
+  return arguments.length
+    ? pTypedDefaultFn(Symbol)<T>(dflt as T)
+    : pTypedOptFn(Symbol)<T>();
+}
+function symReqTyped<T>(): PTypedReqFnReturnType<T> {
+  return pTypedReqFn(Symbol)<T>();
+}
+sym.req = symReq as typeof symReq & { typed: typeof symReqTyped };
+sym.typed = symTyped as typeof symTyped & { req: typeof symReqTyped };
+sym.req.typed = symReqTyped;
+sym.typed.req = symReqTyped;
+function symStrictDefault(): typeof pSymOrNull;
+function symStrictDefault(dflt: symbol): ReturnType<PSymDefault>;
+function symStrictDefault(dflt?: symbol): unknown {
+  return arguments.length ? pSymDefault(dflt as symbol) : pSymOrNull;
+}
+symStrictDefault.req = sym.req;
+symStrictDefault.typed = sym.typed;
 
 type P = {
   str: typeof str;
-
-  Str: PStrOpt;
-  Num: PNumOpt;
-  Bool: PBoolOpt;
-  Obj: PObjOpt;
-  Arr: PArrOpt;
-  Func: PFuncOpt;
-  Date: PDateOpt;
-  Sym: PSymOpt;
-
-  StrReq: PStrReq;
-  NumReq: PNumReq;
-  BoolReq: PBoolReq;
-  ObjReq: PObjReq;
-  ArrReq: PArrReq;
-  FuncReq: PFuncReq;
-  DateReq: PDateReq;
-  SymReq: PSymReq;
-
-  StrDefault: PStrDefault;
-  NumDefault: PNumDefault;
-  BoolDefault: PBoolDefault;
-  ObjDefault: PObjDefault;
-  ArrDefault: PArrDefault;
-  FuncDefault: PFuncDefault;
-  DateDefault: PDateDefault;
-  SymDefault: PSymDefault;
-
-  StrDefaultEmpty: PStrDefaultEmpty;
-  NumDefaultZero: PNumDefaultZero;
-  BoolDefaultFalse: PBoolDefaultFalse;
-  BoolDefaultTrue: PBoolDefaultTrue;
-  ObjDefaultEmpty: PObjDefaultEmpty;
-  ArrDefaultEmpty: PArrDefaultEmpty;
-  FuncDefaultIdentity: PFuncDefaultIdentity;
-  DateDefaultNow: PDateDefaultNow;
-  SymDefaultEmpty: PSymDefaultEmpty;
-
-  StrOrNull: typeof pStrOrNull;
-  NumOrNull: typeof pNumOrNull;
-  BoolOrNull: typeof pBoolOrNull;
-  ObjOrNull: typeof pObjOrNull;
-  ArrOrNull: typeof pArrOrNull;
-  FuncOrNull: typeof pFuncOrNull;
-  DateOrNull: typeof pDateOrNull;
-  SymOrNull: typeof pSymOrNull;
-
-  Typed: PTypedOpt;
-  TypedReq: PTypedReq;
-  TypedDefault: PTypedDefault;
-
-  TypedStr: PTypedStrOpt;
-  TypedStrReq: PTypedStrReq;
-  TypedStrDefault: PTypedStrDefault;
-
-  TypedNum: PTypedNumOpt;
-  TypedNumReq: PTypedNumReq;
-  TypedNumDefault: PTypedNumDefault;
-
-  TypedObj: PTypedObjOpt;
-  TypedObjReq: PTypedObjReq;
-  TypedObjDefault: PTypedObjDefault;
-
-  TypedArr: PTypedArrOpt;
-  TypedArrReq: PTypedArrReq;
-  TypedArrDefault: PTypedArrDefault;
-
-  TypedFunc: PTypedFuncOpt;
-  TypedFuncReq: PTypedFuncReq;
-  TypedFuncDefault: PTypedFuncDefault;
-
-  TypedDate: PTypedDateOpt;
-  TypedDateReq: PTypedDateReq;
-  TypedDateDefault: PTypedDateDefault;
-
-  TypedSym: PTypedSymOpt;
-  TypedSymReq: PTypedSymReq;
-  TypedSymDefault: PTypedSymDefault;
-
-  Validated: typeof pValidated;
-
-  S: PStrOpt;
-  N: PNumOpt;
-  B: PBoolOpt;
-  O: PObjOpt;
-  A: PArrOpt;
-  F: PFuncOpt;
-  D: PDateOpt;
-  Y: PSymOpt;
-
-  SR: PStrReq;
-  NR: PNumReq;
-  BR: PBoolReq;
-  OR: PObjReq;
-  AR: PArrReq;
-  FR: PFuncReq;
-  DR: PDateReq;
-  YR: PSymReq;
-
-  SD: PStrDefault;
-  ND: PNumDefault;
-  BD: PBoolDefault;
-  OD: PObjDefault;
-  AD: PArrDefault;
-  FD: PFuncDefault;
-  DD: PDateDefault;
-  YD: PSymDefault;
-
-  SDE: PStrDefaultEmpty;
-  NDZ: PNumDefaultZero;
-  BDF: PBoolDefaultFalse;
-  BDT: PBoolDefaultTrue;
-  ODE: PObjDefaultEmpty;
-  ADE: PArrDefaultEmpty;
-  FDI: PFuncDefaultIdentity;
-  DDN: PDateDefaultNow;
-  YDE: PSymDefaultEmpty;
-
-  SON: typeof pStrOrNull;
-  NON: typeof pNumOrNull;
-  BON: typeof pBoolOrNull;
-  OON: typeof pObjOrNull;
-  AON: typeof pArrOrNull;
-  FON: typeof pFuncOrNull;
-  DON: typeof pDateOrNull;
-  YON: typeof pSymOrNull;
-
-  TS: PTypedStrOpt;
-  TSR: PTypedStrReq;
-  TSD: PTypedStrDefault;
-
-  TN: PTypedNumOpt;
-  TNR: PTypedNumReq;
-  TND: PTypedNumDefault;
-
-  TO: PTypedObjOpt;
-  TOR: PTypedObjReq;
-  TOD: PTypedObjDefault;
-
-  TA: PTypedArrOpt;
-  TAR: PTypedArrReq;
-  TAD: PTypedArrDefault;
-
-  TF: PTypedFuncOpt;
-  TFR: PTypedFuncReq;
-  TFD: PTypedFuncDefault;
-
-  TD: PTypedDateOpt;
-  TDR: PTypedDateReq;
-  TDD: PTypedDateDefault;
-
-  TY: PTypedSymOpt;
-  TYR: PTypedSymReq;
-  TYD: PTypedSymDefault;
-
-  V: typeof pValidated;
+  num: typeof num;
+  bool: typeof bool;
+  obj: typeof obj;
+  arr: typeof arr;
+  func: typeof func;
+  date: typeof date;
+  sym: typeof sym;
 
   pick: typeof pick;
   validateMultipleProps: typeof validateMultipleProps;
@@ -584,162 +547,13 @@ type P = {
 };
 const P: P = {
   str,
-
-  Str: pStrOpt(),
-  Num: pNumOpt(),
-  Bool: pBoolOpt(),
-  Obj: pObjOpt(),
-  Arr: pArrOpt(),
-  Func: pFuncOpt(),
-  Date: pDateOpt(),
-  Sym: pSymOpt(),
-
-  StrReq: pStrReq(),
-  NumReq: pNumReq(),
-  BoolReq: pBoolReq(),
-  ObjReq: pObjReq(),
-  ArrReq: pArrReq(),
-  FuncReq: pFuncReq(),
-  DateReq: pDateReq(),
-  SymReq: pSymReq(),
-
-  StrDefault: pStrDefault,
-  NumDefault: pNumDefault,
-  BoolDefault: pBoolDefault,
-  ObjDefault: pObjDefault,
-  ArrDefault: pArrDefault,
-  FuncDefault: pFuncDefault,
-  DateDefault: pDateDefault,
-  SymDefault: pSymDefault,
-
-  StrDefaultEmpty: pStrDefaultEmpty,
-  NumDefaultZero: pNumDefaultZero,
-  BoolDefaultFalse: pBoolDefaultFalse,
-  BoolDefaultTrue: pBoolDefaultTrue,
-  ObjDefaultEmpty: pObjDefaultEmpty,
-  ArrDefaultEmpty: pArrDefaultEmpty,
-  FuncDefaultIdentity: pFuncDefaultIdentity,
-  DateDefaultNow: pDateDefaultNow,
-  SymDefaultEmpty: pSymDefaultEmpty,
-
-  StrOrNull: pStrOrNull,
-  NumOrNull: pNumOrNull,
-  BoolOrNull: pBoolOrNull,
-  ObjOrNull: pObjOrNull,
-  ArrOrNull: pArrOrNull,
-  FuncOrNull: pFuncOrNull,
-  DateOrNull: pDateOrNull,
-  SymOrNull: pSymOrNull,
-
-  Typed: pTypedOptFn,
-  TypedReq: pTypedReqFn,
-  TypedDefault: pTypedDefaultFn,
-
-  TypedStr: pTypedOptFn(String),
-  TypedStrReq: pTypedReqFn(String),
-  TypedStrDefault: pTypedDefaultFn(String),
-
-  TypedNum: pTypedOptFn(Number),
-  TypedNumReq: pTypedReqFn(Number),
-  TypedNumDefault: pTypedDefaultFn(Number),
-
-  TypedObj: pTypedOptFn(Object),
-  TypedObjReq: pTypedReqFn(Object),
-  TypedObjDefault: pTypedDefaultFn(Object),
-
-  TypedArr: pTypedOptFn(Array),
-  TypedArrReq: pTypedReqFn(Array),
-  TypedArrDefault: pTypedDefaultFn(Array),
-
-  TypedFunc: pTypedOptFn(Function),
-  TypedFuncReq: pTypedReqFn(Function),
-  TypedFuncDefault: pTypedDefaultFn(Function),
-
-  TypedDate: pTypedOptFn(Date),
-  TypedDateReq: pTypedReqFn(Date),
-  TypedDateDefault: pTypedDefaultFn(Date),
-
-  TypedSym: pTypedOptFn(Symbol),
-  TypedSymReq: pTypedReqFn(Symbol),
-  TypedSymDefault: pTypedDefaultFn(Symbol),
-
-  Validated: pValidated,
-
-  S: pStrOpt(),
-  N: pNumOpt(),
-  B: pBoolOpt(),
-  O: pObjOpt(),
-  A: pArrOpt(),
-  F: pFuncOpt(),
-  D: pDateOpt(),
-  Y: pSymOpt(),
-
-  SR: pStrReq(),
-  NR: pNumReq(),
-  BR: pBoolReq(),
-  OR: pObjReq(),
-  AR: pArrReq(),
-  FR: pFuncReq(),
-  DR: pDateReq(),
-  YR: pSymReq(),
-
-  SD: pStrDefault,
-  ND: pNumDefault,
-  BD: pBoolDefault,
-  OD: pObjDefault,
-  AD: pArrDefault,
-  FD: pFuncDefault,
-  DD: pDateDefault,
-  YD: pSymDefault,
-
-  SDE: pStrDefaultEmpty,
-  NDZ: pNumDefaultZero,
-  BDF: pBoolDefaultFalse,
-  BDT: pBoolDefaultTrue,
-  ODE: pObjDefaultEmpty,
-  ADE: pArrDefaultEmpty,
-  FDI: pFuncDefaultIdentity,
-  DDN: pDateDefaultNow,
-  YDE: pSymDefaultEmpty,
-
-  SON: pStrOrNull,
-  NON: pNumOrNull,
-  BON: pBoolOrNull,
-  OON: pObjOrNull,
-  AON: pArrOrNull,
-  FON: pFuncOrNull,
-  DON: pDateOrNull,
-  YON: pSymOrNull,
-
-  TS: pTypedOptFn(String),
-  TSR: pTypedReqFn(String),
-  TSD: pTypedDefaultFn(String),
-
-  TN: pTypedOptFn(Number),
-  TNR: pTypedReqFn(Number),
-  TND: pTypedDefaultFn(Number),
-
-  TO: pTypedOptFn(Object),
-  TOR: pTypedReqFn(Object),
-  TOD: pTypedDefaultFn(Object),
-
-  TA: pTypedOptFn(Array),
-  TAR: pTypedReqFn(Array),
-  TAD: pTypedDefaultFn(Array),
-
-  TF: pTypedOptFn(Function),
-  TFR: pTypedReqFn(Function),
-  TFD: pTypedDefaultFn(Function),
-
-  TD: pTypedOptFn(Date),
-  TDR: pTypedReqFn(Date),
-  TDD: pTypedDefaultFn(Date),
-
-  TY: pTypedOptFn(Symbol),
-  TYR: pTypedReqFn(Symbol),
-  TYD: pTypedDefaultFn(Symbol),
-
-  V: pValidated,
+  num,
+  bool,
+  obj,
+  arr,
+  func,
+  date,
+  sym,
 
   pick,
   validateMultipleProps,
@@ -750,61 +564,27 @@ const P: P = {
 
 type PStrictDefaults = Omit<
   P,
-  | "str"
-  | "Str"
-  | "Num"
-  | "Bool"
-  | "Obj"
-  | "Arr"
-  | "Func"
-  | "Date"
-  | "Sym"
-  | "S"
-  | "N"
-  | "B"
-  | "O"
-  | "A"
-  | "F"
-  | "D"
-  | "Y"
+  "str" | "num" | "bool" | "obj" | "arr" | "func" | "date" | "sym"
 > & {
   str: typeof strStrictDefault;
-  Str: typeof pStrOrNull;
-  Num: typeof pNumOrNull;
-  Bool: PBoolDefaultFalse;
-  Obj: typeof pObjOrNull;
-  Arr: typeof pArrOrNull;
-  Func: typeof pFuncOrNull;
-  Date: typeof pDateOrNull;
-  Sym: typeof pSymOrNull;
-  S: typeof pStrOrNull;
-  N: typeof pNumOrNull;
-  B: PBoolDefaultFalse;
-  O: typeof pObjOrNull;
-  A: typeof pArrOrNull;
-  F: typeof pFuncOrNull;
-  D: typeof pDateOrNull;
-  Y: typeof pSymOrNull;
+  num: typeof numStrictDefault;
+  bool: typeof boolStrictDefault;
+  obj: typeof objStrictDefault;
+  arr: typeof arrStrictDefault;
+  func: typeof funcStrictDefault;
+  date: typeof dateStrictDefault;
+  sym: typeof symStrictDefault;
 };
 const PStrictDefaults: PStrictDefaults = {
   ...P,
   str: strStrictDefault,
-  Str: pStrOrNull,
-  Num: pNumOrNull,
-  Bool: pBoolDefaultFalse,
-  Obj: pObjOrNull,
-  Arr: pArrOrNull,
-  Func: pFuncOrNull,
-  Date: pDateOrNull,
-  Sym: pSymOrNull,
-  S: pStrOrNull,
-  N: pNumOrNull,
-  B: pBoolDefaultFalse,
-  O: pObjOrNull,
-  A: pArrOrNull,
-  F: pFuncOrNull,
-  D: pDateOrNull,
-  Y: pSymOrNull,
+  num: numStrictDefault,
+  bool: boolStrictDefault,
+  obj: objStrictDefault,
+  arr: arrStrictDefault,
+  func: funcStrictDefault,
+  date: dateStrictDefault,
+  sym: symStrictDefault,
 };
 
 export { P, PStrictDefaults };
